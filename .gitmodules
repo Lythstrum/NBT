@@ -1,0 +1,6 @@
+[submodule "libs/CppBinaryStream"]
+	path = libs/CppBinaryStream
+	url = https://github.com/vp817/CppBinaryStream.git
+[submodule "libs/SamplesHelper"]
+	path = libs/SamplesHelper
+	url = https://github.com/vp817/SamplesHelper.git
