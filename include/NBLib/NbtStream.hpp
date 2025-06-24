@@ -19,6 +19,8 @@
 
 #include <BMLib/BinaryStream.hpp>
 #include "NbtType.hpp"
+#include <NBLib/exceptions/UnknwonTagEncountered.hpp>
+#include <NBLib/exceptions/InvalidNbtFile.hpp>
 
 namespace NBLib
 {
@@ -26,7 +28,8 @@ namespace NBLib
 	{
 		BIG,
 		LITTLE,
-		NETWORK
+		NETWORK,
+		_UNKNOWN
 	};
 
 	class NbtStream : public BMLib::BinaryStream
@@ -46,18 +49,37 @@ namespace NBLib
 		std::int64_t readTagLongPL();
 		float readTagFloatPL();
 		double readTagDoublePL();
-		std::vector<std::int8_t> readTagByteArrayPL();
+		std::vector<std::uint8_t> readTagByteArrayPL();
 		std::string readTagStringPL();
 		std::vector<struct Tag::nbt_tag_t> readTagListPL();
 		std::vector<struct Tag::nbt_tag_t> readTagCompoundPL();
+		std::vector<std::int32_t> readTagIntArrayPL();
+		std::vector<std::int64_t> readTagLongArrayPL();
 		void readTagPayload(Tag::nbt_tag_t *value);
 
 		struct Tag::nbt_tag_t readTag();
 
-		struct Tag::nbt_tag_t parse();
+		void writeTagTypeId(Tag::NbtTypeId value);
 
-		void add(struct Tag::nbt_tag_t tag);
+		void writeTagBytePL(std::int8_t value);
+		void writeTagShortPL(std::int16_t value);
+		void writeTagIntPL(std::int32_t value);
+		void writeTagLongPL(std::int64_t value);
+		void writeTagFloatPL(float value);
+		void writeTagDoublePL(double value);
+		void writeTagByteArrayPL(std::vector<std::uint8_t> value);
+		void writeTagStringPL(std::string value);
+		void writeTagListPL(std::vector<struct Tag::nbt_tag_t> value);
+		void writeTagCompoundPL(std::vector<struct Tag::nbt_tag_t> value);
+		void writeTagIntArrayPL(std::vector<std::int32_t> value);
+		void writeTagLongArrayPL(std::vector<std::int64_t> value);
+		void writeTagPayload(Tag::nbt_tag_t &value);
 
-		void load();
+		void writeTag(struct Tag::nbt_tag_t value);
+
+		struct Tag::nbt_tag_t parseSingle();
+		std::vector<struct Tag::nbt_tag_t> parse();
+
+		void load(std::vector<struct Tag::nbt_tag_t> value);
 	};
 };

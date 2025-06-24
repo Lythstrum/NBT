@@ -7,12 +7,6 @@ set(PARENT_INC_DIR_NBT ${PROJECT_SOURCE_DIR}/include)
 
 option(NBT_COMPILE_TESTS "compile the all tests or not." OFF)
 option(NBT_SHARED "compile the library as shared." OFF)
-# option(NBT_ASAN "dev option to turn on AddressSanitizer" OFF)
-
-# if(UNIX AND NOT WIN32 AND NBT_ASAN)
-#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer -g")
-#     message(NOTICE "AddressSanitizer ON")
-# endif()
 
 file(GLOB_RECURSE LIB_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 

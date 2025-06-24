@@ -5,8 +5,9 @@
 
 BMLib::Buffer *get_file_data(const char *filename)
 {
-	std::fstream file(filename, std::ios::in | std::ios::binary);
-	file.seekg(0, std::ios::end);
+	std::fstream file(filename, std::ios::in | std::ios::binary | std::ios::ate);
+	if (!file.is_open())
+		return nullptr;
 	std::streampos bin_sz = file.tellg();
 	file.seekg(0, std::ios::beg);
 	if (bin_sz < 1) {
@@ -27,124 +28,58 @@ std::string ws_padding(int padding)
 	return result;
 }
 
-std::string nbt_stringify(NBLib::Tag::nbt_tag_t nbt_tag, int padding = 0, bool nameless = false)
+std::string nbt_stringify(NBLib::Tag::nbt_tag_t nbt_tag, int base_pad_value = 3, int padding = 0)
 {
 	std::ostringstream to_write;
 
-	if (std::holds_alternative<NBLib::Tag::compound_tag_t>(nbt_tag.tag)) {
-		NBLib::Tag::compound_tag_t compound_tag = std::get<NBLib::Tag::compound_tag_t>(nbt_tag.tag);
-		std::size_t cpt_value_size = compound_tag.value.size();
-
+	std::visit([&](auto &&arg) {
+		using T = std::decay_t<decltype(arg)>;
 		to_write << ws_padding(padding);
-		to_write << "TAG_Compound";
-		if (!nameless)
+		to_write << "TAG_" << nbt_tag.type_name;
+		if (nbt_tag.name.size() != 0)
 			to_write << "(\"" << nbt_tag.name << "\")";
-		to_write << ": " << std::to_string(cpt_value_size) << " entries\n";
-		if (cpt_value_size < 1) {
-			to_write << ws_padding(padding);
-			to_write << "{}";
-		} else {
-			to_write << ws_padding(padding);
-			to_write << "{\n";
-			for (std::size_t i = 0; i < cpt_value_size; i++) {
-				to_write << nbt_stringify(compound_tag.value.at(i), padding == 0 ? 3 : padding * 2);
-				to_write << "\n";
-				if (i == cpt_value_size - 1) {
-					to_write << ws_padding(padding);
-					to_write << "}";
-				}
+		to_write << ": ";
+		if constexpr (std::is_same_v<T, NBLib::Tag::compound_tag_t> || std::is_same_v<T, NBLib::Tag::list_tag_t>) {
+			std::size_t atp_size = arg.value.size();
+
+			to_write << std::to_string(atp_size) << " entries";
+			if constexpr (std::is_same_v<T, NBLib::Tag::list_tag_t>) {
+				if (atp_size > 0)
+					to_write << " of type TAG_" << arg.value.begin()->type_name;
 			}
-		}
-	} else if (std::holds_alternative<NBLib::Tag::list_tag_t>(nbt_tag.tag)) {
-		NBLib::Tag::list_tag_t lst_tag = std::get<NBLib::Tag::list_tag_t>(nbt_tag.tag);
-		std::size_t lt_value_size = lst_tag.value.size();
-
-		to_write << ws_padding(padding);
-		to_write << "TAG_List";
-		if (!nameless)
-			to_write << "(\"" << nbt_tag.name << "\")";
-		to_write << ": " << std::to_string(lt_value_size) << " entries\n";
-		if (lt_value_size < 1) {
-			to_write << ws_padding(padding);
-			to_write << "{}";
-		} else {
-			to_write << ws_padding(padding);
-			to_write << "{\n";
-			for (std::size_t i = 0; i < lt_value_size; i++) {
-				to_write << nbt_stringify(lst_tag.value.at(i), padding == 0 ? 3 : padding * 2, true);
-				to_write << "\n";
-				if (i == lt_value_size - 1) {
-					to_write << ws_padding(padding);
-					to_write << "}";
+			to_write << "\n";
+			if (atp_size < 1) {
+				to_write << ws_padding(padding);
+				to_write << "{}";
+			} else {
+				to_write << ws_padding(padding);
+				to_write << "{\n";
+				for (std::size_t i = 0; i < atp_size; i++) {
+					to_write << nbt_stringify(arg.value.at(i), base_pad_value, padding == 0 ? base_pad_value : padding + base_pad_value);
+					to_write << "\n";
 				}
+				to_write << ws_padding(padding);
+				to_write << "}";
 			}
+		} else if constexpr (std::is_same_v<T, NBLib::Tag::string_tag_t>)
+			to_write << arg.value;
+		else if constexpr (
+			std::is_same_v<T, NBLib::Tag::short_tag_t> || std::is_same_v<T, NBLib::Tag::int_tag_t> || std::is_same_v<T, NBLib::Tag::long_tag_t> ||
+			std::is_same_v<T, NBLib::Tag::byte_tag_t> || std::is_same_v<T, NBLib::Tag::float_tag_t> || std::is_same_v<T, NBLib::Tag::double_tag_t>)
+				to_write << std::to_string(arg.value);
+		else if constexpr (
+			std::is_same_v<T, NBLib::Tag::byte_array_tag_t> || std::is_same_v<T, NBLib::Tag::int_array_tag_t> ||
+			std::is_same_v<T, NBLib::Tag::long_array_tag_t>) {
+				to_write << ": [" << std::to_string(arg.value.size()) << " ";
+				if constexpr (std::is_same_v<T, NBLib::Tag::byte_array_tag_t>)
+					to_write << "bytes";
+				else if constexpr (std::is_same_v<T, NBLib::Tag::int_array_tag_t>)
+					to_write << "integers";
+				else if constexpr (std::is_same_v<T, NBLib::Tag::long_array_tag_t>)
+					to_write << "long integers";
+				to_write << "]";
 		}
-	}  else if (std::holds_alternative<NBLib::Tag::byte_array_tag_t>(nbt_tag.tag)) {
-		NBLib::Tag::byte_array_tag_t bt_tag = std::get<NBLib::Tag::byte_array_tag_t>(nbt_tag.tag);
-		std::size_t bt_tag_size = bt_tag.value.size();
-
-		to_write << ws_padding(padding);
-		to_write << "TAG_Byte_Array";
-		if (!nameless)
-			to_write << "(\"" << nbt_tag.name << "\")";
-		to_write << ": [" << std::to_string(bt_tag_size) << " bytes" << "]";
-	} else if (std::holds_alternative<NBLib::Tag::string_tag_t>(nbt_tag.tag)) {
-		NBLib::Tag::string_tag_t str_tag = std::get<NBLib::Tag::string_tag_t>(nbt_tag.tag);
-
-		to_write << ws_padding(padding);
-		to_write << "TAG_String";
-		if (!nameless)
-			to_write << "(\"" << nbt_tag.name << "\")";
-		to_write << ": " << str_tag.value;
-	} else if (std::holds_alternative<NBLib::Tag::byte_tag_t>(nbt_tag.tag)) {
-		NBLib::Tag::byte_tag_t bt_tag = std::get<NBLib::Tag::byte_tag_t>(nbt_tag.tag);
-
-		to_write << ws_padding(padding);
-		to_write << "TAG_Byte";
-		if (!nameless)
-			to_write << "(\"" << nbt_tag.name << "\")";
-		to_write << ": " << std::to_string(bt_tag.value);
-	} else if (std::holds_alternative<NBLib::Tag::short_tag_t>(nbt_tag.tag)) {
-		NBLib::Tag::short_tag_t sht_tag = std::get<NBLib::Tag::short_tag_t>(nbt_tag.tag);
-
-		to_write << ws_padding(padding);
-		to_write << "TAG_Short";
-		if (!nameless)
-			to_write << "(\"" << nbt_tag.name << "\")";
-		to_write << ": " << sht_tag.value;
-	} else if (std::holds_alternative<NBLib::Tag::int_tag_t>(nbt_tag.tag)) {
-		NBLib::Tag::int_tag_t int_tag = std::get<NBLib::Tag::int_tag_t>(nbt_tag.tag);
-
-		to_write << ws_padding(padding);
-		to_write << "TAG_Int";
-		if (!nameless)
-			to_write << "(\"" << nbt_tag.name << "\")";
-		to_write << ": " << int_tag.value;
-	} else if (std::holds_alternative<NBLib::Tag::long_tag_t>(nbt_tag.tag)) {
-		NBLib::Tag::long_tag_t lng_tag = std::get<NBLib::Tag::long_tag_t>(nbt_tag.tag);
-
-		to_write << ws_padding(padding);
-		to_write << "TAG_Long";
-		if (!nameless)
-			to_write << "(\"" << nbt_tag.name << "\")";
-		to_write << ": " << lng_tag.value;
-	} else if (std::holds_alternative<NBLib::Tag::float_tag_t>(nbt_tag.tag)) {
-		NBLib::Tag::float_tag_t flt_tag = std::get<NBLib::Tag::float_tag_t>(nbt_tag.tag);
-
-		to_write << ws_padding(padding);
-		to_write << "TAG_Float";
-		if (!nameless)
-			to_write << "(\"" << nbt_tag.name << "\")";
-		to_write << ": " << flt_tag.value;
-	} else if (std::holds_alternative<NBLib::Tag::double_tag_t>(nbt_tag.tag)) {
-		NBLib::Tag::double_tag_t dbl_tag = std::get<NBLib::Tag::double_tag_t>(nbt_tag.tag);
-
-		to_write << ws_padding(padding);
-		to_write << "TAG_Double";
-		if (!nameless)
-			to_write << "(\"" << nbt_tag.name << "\")";
-		to_write << ": " << dbl_tag.value;
-	}
+	}, nbt_tag.tag);
 
 	return to_write.str();
 }
@@ -168,7 +103,7 @@ int main(int argc, char *argv[])
 			nbt_strm_type = NBLib::NbtStreamType::NETWORK;
 	}
 	NBLib::NbtStream nbt(nbt_strm_type, fdat_buf);
-	auto nbt_tag = nbt.parse();
-	std::cout << nbt_stringify(nbt_tag) << std::endl;
+	for (auto &nbt_tag : nbt.parse())
+		std::cout << nbt_stringify(nbt_tag) << std::endl;
 	return 0;
 }

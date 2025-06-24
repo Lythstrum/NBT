@@ -27,7 +27,16 @@ bigtest_nbt
 libNBT.a
 libNBT.so
 reading_test
+writing_test
+endian_switch
 
 # Nbt-related stuff
-test.nbt
-bigtest.nbt
+test_big.nbt
+test_little.nbt
+test_network.nbt
+bigtest_big.nbt
+bigtest_little.nbt
+bigtest_network.nbt
+igloo_bottom.nbt
+igloo_bottom_little.nbt
+base_floor.nbt

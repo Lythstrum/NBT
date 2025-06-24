@@ -15,9 +15,12 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#pragma once
+
 #include <cstdint>
 #include <variant>
 #include <vector>
+#include <string>
 
 namespace NBLib::Tag
 {
@@ -34,7 +37,9 @@ namespace NBLib::Tag
 		STRING,
 		LIST,
 		COMPOUND,
-		UNKNOWN
+		INT_ARRAY,
+		LONG_ARRAY,
+		_UNKNOWN
 	};
 
 	struct end_tag_t
@@ -73,7 +78,7 @@ namespace NBLib::Tag
 
 	struct byte_array_tag_t
 	{
-		std::vector<std::int8_t> value;
+		std::vector<std::uint8_t> value;
 	};
 
 	struct string_tag_t
@@ -91,7 +96,17 @@ namespace NBLib::Tag
 		std::vector<struct nbt_tag_t> value;
 	};
 
-	using nbt_any_tag_t = std::variant<struct end_tag_t, struct byte_tag_t, struct short_tag_t, struct int_tag_t, struct long_tag_t, struct float_tag_t, struct double_tag_t, struct byte_array_tag_t, struct string_tag_t, struct list_tag_t, struct compound_tag_t>;
+	struct int_array_tag_t
+	{
+		std::vector<std::int32_t> value;
+	};
+
+	struct long_array_tag_t
+	{
+		std::vector<std::int64_t> value;
+	};
+
+	using nbt_any_tag_t = std::variant<struct end_tag_t, struct byte_tag_t, struct short_tag_t, struct int_tag_t, struct long_tag_t, struct float_tag_t, struct double_tag_t, struct byte_array_tag_t, struct string_tag_t, struct list_tag_t, struct compound_tag_t, struct int_array_tag_t, struct long_array_tag_t>;
 
 	struct nbt_tag_t
 	{
