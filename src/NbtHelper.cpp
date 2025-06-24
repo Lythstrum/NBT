@@ -18,6 +18,28 @@
 #include <NBLib/NbtHelper.hpp>
 #include <stdexcept>
 
+NBLib::NbtHelper::CompoundTagWrapper::CompoundTagWrapper(Tag::compound_tag_t &tag)
+	: tag(tag)
+{
+}
+
+NBLib::Tag::nbt_any_tag_t NBLib::NbtHelper::CompoundTagWrapper::getTag(std::string name, Tag::NbtTypeId type_id)
+{
+	Tag::nbt_any_tag_t result = std::monostate {};
+	for (std::size_t i = 0; i < this->tag.value.size(); i++) {
+		Tag::nbt_tag_t nbt_tag = this->tag.value.at(i);
+		if (nbt_tag.name == name && nbt_tag.type_id == type_id)
+			result = nbt_tag.tag;
+	}
+	return result;
+}
+
+NBLib::Tag::nbt_any_tag_t *NBLib::NbtHelper::makeTagPtr(NBLib::Tag::nbt_any_tag_t value)
+{
+	NBLib::Tag::nbt_any_tag_t *result = &value;
+	return result;
+}
+
 NBLib::Tag::nbt_tag_t NBLib::NbtHelper::createTag(std::string name, Tag::nbt_any_tag_t tag)
 {
 	if (std::holds_alternative<Tag::end_tag_t>(tag))

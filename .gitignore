@@ -29,6 +29,7 @@ libNBT.so
 reading_test
 writing_test
 endian_switch_test
+compound_wrapper_test
 
 # Nbt-related stuff
 test_big.nbt

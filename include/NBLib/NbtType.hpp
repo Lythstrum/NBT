@@ -106,7 +106,7 @@ namespace NBLib::Tag
 		std::vector<std::int64_t> value;
 	};
 
-	using nbt_any_tag_t = std::variant<struct end_tag_t, struct byte_tag_t, struct short_tag_t, struct int_tag_t, struct long_tag_t, struct float_tag_t, struct double_tag_t, struct byte_array_tag_t, struct string_tag_t, struct list_tag_t, struct compound_tag_t, struct int_array_tag_t, struct long_array_tag_t>;
+	using nbt_any_tag_t = std::variant<std::monostate, struct end_tag_t, struct byte_tag_t, struct short_tag_t, struct int_tag_t, struct long_tag_t, struct float_tag_t, struct double_tag_t, struct byte_array_tag_t, struct string_tag_t, struct list_tag_t, struct compound_tag_t, struct int_array_tag_t, struct long_array_tag_t>;
 
 	struct nbt_tag_t
 	{

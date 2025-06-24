@@ -23,7 +23,16 @@ namespace NBLib::NbtHelper
 {
 	class CompoundTagWrapper
 	{
+	private:
+		Tag::compound_tag_t tag;
+
+	public:
+		CompoundTagWrapper(Tag::compound_tag_t &tag);
+
+		Tag::nbt_any_tag_t getTag(std::string name, Tag::NbtTypeId type_id);
 	};
+
+	NBLib::Tag::nbt_any_tag_t *makeTagPtr(NBLib::Tag::nbt_any_tag_t value);
 
 	Tag::nbt_tag_t createTag(std::string name, Tag::nbt_any_tag_t tag);
 };
