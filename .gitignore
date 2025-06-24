@@ -28,7 +28,7 @@ libNBT.a
 libNBT.so
 reading_test
 writing_test
-endian_switch
+endian_switch_test
 
 # Nbt-related stuff
 test_big.nbt
