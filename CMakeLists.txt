@@ -15,7 +15,9 @@ else()
 	add_library(NBT SHARED ${LIB_FILES})
 endif()
 
-add_subdirectory(${LIBS_PATH_NBT}/CppBinaryStream)
+if(NOT TARGET BinaryStream)
+	add_subdirectory(${LIBS_PATH_NBT}/CppBinaryStream)
+endif()
 
 target_include_directories(NBT PUBLIC
 	${PROJECT_SOURCE_DIR}/include
