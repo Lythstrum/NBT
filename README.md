@@ -1,7 +1,3 @@
-# NBT
+# CppNBT
 
-NamedBinaryTag cpp17
-
---- readme&doxygen later
-
-check "samples" directory for now.
+cpp lib for reading and writing nbt files
