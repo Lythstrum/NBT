@@ -286,7 +286,7 @@ void NBLib::NbtStream::writeTagByteArrayPL(std::vector<std::uint8_t> value)
 	std::int32_t length = static_cast<std::int32_t>(value.size());
 	this->writeTagIntPL(length);
 	for (std::int32_t i = 0; i < length; ++i)
-		this->write<std::uint8_t>(value[i]);
+		this->write<std::uint8_t>(value.at(i));
 }
 
 void NBLib::NbtStream::writeTagStringPL(std::string value)
@@ -307,13 +307,13 @@ void NBLib::NbtStream::writeTagListPL(std::vector<struct NBLib::Tag::nbt_tag_t> 
 	std::int32_t length = static_cast<std::int32_t>(value.size());
 	this->writeTagIntPL(length);
 	for (std::int32_t i = 0; i < length; ++i)
-		this->writeTagPayload(value[i]);
+		this->writeTagPayload(value.at(i));
 }
 
 void NBLib::NbtStream::writeTagCompoundPL(std::vector<struct NBLib::Tag::nbt_tag_t> value)
 {
 	for (std::size_t i = 0; i < value.size(); ++i)
-		this->writeTag(value[i]);
+		this->writeTag(value.at(i));
 	this->writeTagTypeId(Tag::NbtTypeId::END);
 }
 
@@ -321,14 +321,14 @@ void NBLib::NbtStream::writeTagIntArrayPL(std::vector<std::int32_t> value)
 {
 	std::int32_t length = static_cast<std::int32_t>(value.size());
 	for (std::int32_t i = 0; i < length; ++i)
-		this->writeTagIntPL(value[i]);
+		this->writeTagIntPL(value.at(i));
 }
 
 void NBLib::NbtStream::writeTagLongArrayPL(std::vector<std::int64_t> value)
 {
 	std::int32_t length = static_cast<std::int32_t>(value.size());
 	for (std::int32_t i = 0; i < length; ++i)
-		this->writeTagLongPL(value[i]);
+		this->writeTagLongPL(value.at(i));
 }
 
 void NBLib::NbtStream::writeTagPayload(Tag::nbt_tag_t &value)
@@ -403,5 +403,5 @@ std::vector<struct NBLib::Tag::nbt_tag_t> NBLib::NbtStream::parse()
 void NBLib::NbtStream::load(std::vector<struct NBLib::Tag::nbt_tag_t> value)
 {
 	for (std::size_t i = 0; i < value.size(); ++i)
-		this->writeTag(value[i]);
+		this->writeTag(value.at(i));
 }
